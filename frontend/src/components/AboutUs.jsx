@@ -57,7 +57,7 @@ export default function AboutUs() {
       <div className="max-w-7xl mx-auto">
         {/* Team Name and Header */}
         <h1 className="text-5xl font-extrabold mb-10 text-center text-indigo-900">
-          The DEEP BUSTERS.
+          The DEEP BUSTERS
         </h1>
 
         {/* Mission Section */}
