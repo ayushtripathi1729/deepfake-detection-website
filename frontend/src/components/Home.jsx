@@ -1010,94 +1010,99 @@ export default function Home() {
   </div>
 </section>
 
-      {/* 5. FAQ + Testimonials left, Contact right */}
-      <section id="faq-testimonials-contact" className="flex flex-col md:flex-row max-w-7xl mx-auto px-4 gap-10 justify-between py-12">
-        {/* Left side: FAQ and Testimonials */}
-        <div className="md:w-1/2 space-y-12 max-w-xl">
-          <div>
-            <h2 className="text-4xl font-bold text-indigo-400 mb-8 text-center md:text-left">FAQ</h2>
-            <FAQAccordion />
-          </div>
-          <div>
-            <h2 className="text-4xl font-bold text-indigo-400 mb-8 text-center md:text-left">Testimonials</h2>
-            <Testimonials />
-          </div>
-        </div>
+     {/* 5. FAQ + Testimonials left, Contact right */}
+<section
+  id="faq-testimonials-contact"
+  className="flex flex-col md:flex-row max-w-7xl mx-auto px-4 gap-10 justify-between pt-[2px] pb-12"
+  style={{ paddingTop: "6rem" }}
+>
+  {/* Left side: FAQ and Testimonials */}
+  <div className="md:w-1/2 space-y-12 max-w-xl">
+    <div>
+      <h2 className="text-4xl font-bold text-indigo-400 mb-8 text-center md:text-left">FAQ</h2>
+      <FAQAccordion />
+    </div>
+    <div>
+      <h2 className="text-4xl font-bold text-indigo-400 mb-8 text-center md:text-left">Testimonials</h2>
+      <Testimonials />
+    </div>
+  </div>
 
-        {/* Right side: Contact Form */}
-        <div className="md:w-1/2 max-w-xl">
-          <h2 className="text-4xl font-bold text-indigo-400 mb-8 text-center md:text-left">Contact Us</h2>
-          <form onSubmit={onSubmit} className="space-y-6" ref={formRef} noValidate>
-            <div className="flex flex-col sm:flex-row gap-6">
-              <InputField
-                label="Name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Required"
-                error={errors.name}
-                className="flex-1"
-              />
-              <InputField
-                label="Phone (optional)"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                type="tel"
-                placeholder="Optional"
-                error={errors.phone}
-                className="flex-1"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-6">
-              <InputField
-                label="Email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                type="email"
-                placeholder="Required if no phone"
-                error={errors.email}
-                className="flex-1"
-              />
-              <SelectField
-                label="Query Type"
-                name="queryType"
-                value={form.queryType}
-                onChange={handleChange}
-                options={["", "General", "Technical", "Feedback"]}
-                error={errors.queryType}
-                className="flex-1"
-              />
-            </div>
-            <TextareaField
-              label="Message"
-              name="message"
-              value={form.message}
-              onChange={handleChange}
-              maxLength={500}
-              error={errors.message}
-            />
-            <div className="flex flex-wrap gap-6 justify-center md:justify-start">
-              <button
-                type="reset"
-                onClick={onReset}
-                disabled={submitting}
-                className="btn-primary bg-indigo-600 hover:bg-indigo-700 py-3 px-8 flex-grow md:flex-grow-0"
-              >
-                Reset
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="btn-primary py-3 px-8 flex-grow md:flex-grow-0"
-              >
-                {submitting ? "Sending..." : "Submit"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
+  {/* Right side: Contact Form */}
+  <div className="md:w-1/2 max-w-xl">
+    <h2 className="text-4xl font-bold text-indigo-400 mb-8 text-center md:text-left">Contact Us</h2>
+    <form onSubmit={onSubmit} className="space-y-6" ref={formRef} noValidate>
+      <div className="flex flex-col sm:flex-row gap-6">
+        <InputField
+          label="Name"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          placeholder="Required"
+          error={errors.name}
+          className="flex-1"
+        />
+        <InputField
+          label="Phone (optional)"
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
+          type="tel"
+          placeholder="Optional"
+          error={errors.phone}
+          className="flex-1"
+        />
+      </div>
+      <div className="flex flex-col sm:flex-row gap-6">
+        <InputField
+          label="Email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          type="email"
+          placeholder="Required if no phone"
+          error={errors.email}
+          className="flex-1"
+        />
+        <SelectField
+          label="Query Type"
+          name="queryType"
+          value={form.queryType}
+          onChange={handleChange}
+          options={["", "General", "Technical", "Feedback"]}
+          error={errors.queryType}
+          className="flex-1"
+        />
+      </div>
+      <TextareaField
+        label="Message"
+        name="message"
+        value={form.message}
+        onChange={handleChange}
+        maxLength={500}
+        error={errors.message}
+      />
+      <div className="flex flex-wrap gap-6 justify-center md:justify-start">
+        <button
+          type="reset"
+          onClick={onReset}
+          disabled={submitting}
+          className="btn-primary bg-indigo-600 hover:bg-indigo-700 py-3 px-8 flex-grow md:flex-grow-0"
+        >
+          Reset
+        </button>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="btn-primary py-3 px-8 flex-grow md:flex-grow-0"
+        >
+          {submitting ? "Sending..." : "Submit"}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
     </>
   );
 }
