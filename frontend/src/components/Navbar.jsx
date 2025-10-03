@@ -25,7 +25,7 @@ function DropdownPortal({ triggerRef, onClose, items = [], show, width = 190, me
       setCoords({
         top: rect.bottom + window.scrollY,
         left: rect.left + window.scrollX,
-        width: Math.max(rect.width, width)
+        width: Math.max(rect.width, width),
       });
     }
   }, [show, triggerRef, width, menuKey]);
@@ -34,9 +34,18 @@ function DropdownPortal({ triggerRef, onClose, items = [], show, width = 190, me
     if (!show) return;
     let hovering = false;
     let timeout = null;
-    function onOver() { hovering = true; if (timeout) clearTimeout(timeout);}
-    function onOut() { hovering = false; timeout = setTimeout(() => { if (!hovering) onClose(); }, 100);}
-    const menu = dropdownRef.current, trigger = triggerRef.current;
+    function onOver() {
+      hovering = true;
+      if (timeout) clearTimeout(timeout);
+    }
+    function onOut() {
+      hovering = false;
+      timeout = setTimeout(() => {
+        if (!hovering) onClose();
+      }, 100);
+    }
+    const menu = dropdownRef.current,
+      trigger = triggerRef.current;
     if (menu && trigger) {
       menu.addEventListener("mouseenter", onOver);
       menu.addEventListener("mouseleave", onOut);
@@ -67,16 +76,16 @@ function DropdownPortal({ triggerRef, onClose, items = [], show, width = 190, me
           left: coords.left,
           top: coords.top,
           minWidth: coords.width,
-          zIndex: 4000,
-          pointerEvents: show ? "auto" : "none"
+          zIndex: 1000,
+          pointerEvents: show ? "auto" : "none",
         }}
       >
         <div className="dropdown-amazon-card small">
-          {items.map(item => (
+          {items.map((item) => (
             <NavLink
               to={item.path}
               key={item.path}
-              className={({ isActive }) => 
+              className={({ isActive }) =>
                 "navbar-link" + (isActive ? " navbar-link-active" : "")
               }
               style={{ textDecoration: "none" }}
@@ -117,7 +126,7 @@ export default function Navbar() {
   return (
     <nav
       className="sticky top-0 z-50 bg-gradient-to-r from-[#1a1a2e80] via-[#20204090] to-[#090a2280] shadow-2xl backdrop-blur-md border-b border-[#24244899]"
-      style={{ minHeight: "76px", boxShadow: "0 4px 32px 0 rgba(14,13,32,0.12)" }}
+      style={{ minHeight: "56px", boxShadow: "0 4px 32px 0 rgba(14,13,32,0.12)" }}
     >
       <style>{`
         .brand-glitch {
@@ -129,6 +138,8 @@ export default function Navbar() {
           letter-spacing: 0.01em;
           text-shadow: 0 2px 20px #6d28d930, 0 0 5px #f43f5e9a;
           animation: glitch 1.2s infinite linear alternate;
+          padding-top: 4px;
+          padding-bottom: 4px;
         }
         @keyframes glitch {
           0% {text-shadow: 2px 0 #9475e2, -2px 0 #14b8a6;}
@@ -143,6 +154,8 @@ export default function Navbar() {
           font-weight: 500;
           transition: color .18s;
           text-decoration: none !important;
+          padding-top: 0.5rem;
+          padding-bottom: 0.5rem;
         }
         .navbar-link-active, .navbar-link:active {
           color: #a86efd !important;
@@ -178,22 +191,20 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between relative">
         <Link
           to="/"
-          className="brand-glitch py-4 select-none tracking-tight"
+          className="brand-glitch select-none tracking-tight"
           onClick={(e) => {
-            if(location.pathname !== "/") {
-              // different page: trigger navigation and scroll top below
+            if (location.pathname !== "/") {
               handleNavScrollTop();
             } else {
-              // already on home: prevent navigation reload, just scroll top immediately
               e.preventDefault();
-              window.scrollTo({top: 0, behavior: "smooth"});
+              window.scrollTo({ top: 0, behavior: "smooth" });
               setDropdown(null);
             }
           }}
         >
           The Deep Busters
         </Link>
-        <ul className="flex gap-6 px-2 overflow-x-auto py-4 items-center" role="menubar">
+        <ul className="flex gap-6 px-2 overflow-x-auto py-2 items-center" role="menubar">
           <li role="none">
             <NavLink
               to="/"
@@ -202,15 +213,15 @@ export default function Navbar() {
                 "navbar-link" + (isActive ? " navbar-link-active" : "")
               }
               onClick={(e) => {
-                if(location.pathname !== "/") {
+                if (location.pathname !== "/") {
                   handleNavScrollTop();
                 } else {
                   e.preventDefault();
-                  window.scrollTo({top:0, behavior:"smooth"});
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                   setDropdown(null);
                 }
               }}
-              style={{textDecoration: "none"}}
+              style={{ textDecoration: "none" }}
             >
               Home
             </NavLink>
@@ -225,7 +236,7 @@ export default function Navbar() {
                 handleNavScrollTop();
                 setDropdown(null);
               }}
-              style={{textDecoration: "none"}}
+              style={{ textDecoration: "none" }}
             >
               About Us
             </NavLink>
@@ -240,7 +251,7 @@ export default function Navbar() {
                 handleNavScrollTop();
                 setDropdown(null);
               }}
-              style={{textDecoration: "none"}}
+              style={{ textDecoration: "none" }}
             >
               Discover
             </NavLink>
@@ -262,9 +273,17 @@ export default function Navbar() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                style={{transform: dropdown === "check" ? "rotate(180deg)" : "none", transition:"0.13s"}}
+                style={{
+                  transform: dropdown === "check" ? "rotate(180deg)" : "none",
+                  transition: "0.13s",
+                }}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
             <DropdownPortal
@@ -293,9 +312,17 @@ export default function Navbar() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                style={{transform: dropdown === "download" ? "rotate(180deg)" : "none", transition:"0.13s"}}
+                style={{
+                  transform: dropdown === "download" ? "rotate(180deg)" : "none",
+                  transition: "0.13s",
+                }}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
             <DropdownPortal
