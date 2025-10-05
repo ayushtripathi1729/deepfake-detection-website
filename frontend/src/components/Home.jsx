@@ -990,7 +990,15 @@ export default function Home() {
 
 {/* 4. Discover Section (Image Left, Content Right) */}
 <section id="discover" className="flex flex-col md:flex-row items-center gap-16 justify-center">
-  <div className="md:w-1/2 md:order-1 max-w-xl space-y-6">
+  <div className="md:w-1/2 rounded-lg shadow-lg overflow-hidden max-w-xl">
+    <img
+      src={SECTIONS[2].image}
+      alt={SECTIONS[2].title}
+      className="w-full h-64 object-cover"
+      loading="lazy"
+    />
+  </div>
+  <div className="md:w-1/2 max-w-xl space-y-6">
     <h2 className="text-4xl font-bold text-indigo-400">{SECTIONS[2].title}</h2>
     <h3 className="text-xl font-semibold text-indigo-300 mb-6">{SECTIONS[2].subtitle}</h3>
     <TypewriterParagraph
@@ -998,14 +1006,6 @@ export default function Home() {
       cursorVisible={true}
       startTyping={section === 3}
       speed={15}
-    />
-  </div>
-  <div className="md:w-1/2 md:order-2 rounded-lg shadow-lg overflow-hidden max-w-xl">
-    <img
-      src={SECTIONS[2].image}
-      alt={SECTIONS[2].title}
-      className="w-full h-64 object-cover"
-      loading="lazy"
     />
   </div>
 </section>
