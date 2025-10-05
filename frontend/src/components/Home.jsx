@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
-
+import FuturisticThemeWrapper from './FuturisticThemeWrapper';
 import parta from "../assets/logos/parta1.jpg";
 import partb from "../assets/logos/partb.jpg";
 import partc from "../assets/logos/partc1.jpg";
@@ -815,117 +815,17 @@ export default function Home() {
 
   return (
     <>
-      <style>{`
-        html, body {
-          margin:0; padding:0; height:100%; font-family: 'Montserrat', sans-serif;
-          background: linear-gradient(180deg, #0f172a 0%, #000 100%);
-          color:#e0e7ff; scroll-behavior: smooth; overflow-x: hidden;
-          scroll-snap-type: y mandatory;
-        }
-        ::-webkit-scrollbar {
-          width:10px; height:10px;
-        }
-        ::-webkit-scrollbar-track {
-          background:#0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-          background:#7c37eb; border-radius:5px; border:2px solid #0f172a;
-        }
-        .input-field {
-          width:100%; padding:.5rem .75rem; border:2px solid #5f3ebd; border-radius:.375rem;
-          background:#1a2030; color:#e0e7ff; font-size:1rem; transition:border-color .3s ease;
-        }
-        .input-field:focus {
-          outline:none; border-color:#7c38eb; box-shadow:0 0 10px rgba(124,56,235,.66); background:#2c3450;
-        }
-        .input-field.border-red-600 {
-          border-color:#f87171 !important;
-        }
-        .btn-primary {
-          padding:14px 32px; background:#7c38eb; font-weight:700; font-size:1.125rem; border-radius:.5rem;
-          color:#fff; cursor:pointer; border:none; user-select:none; transition:background-color .3s ease;
-        }
-        .btn-primary:hover {
-          background:#5825c0;
-        }
-        .flicker-highlight {
-          animation:flickerAnimation 3.5s linear infinite alternate;
-          color:#fc6f6f; font-weight:900;
-          text-shadow:0 0 10px #ff7a7a, 0 0 30px #ff5050, 0 0 60px #ff1f1f;
-        }
-        @keyframes flickerAnimation {
-          0%,20%,40%,60%,80%,100% {opacity:1; filter:brightness(1.3);}
-          10%,30%,50%,70%,90% {opacity:0.7; filter:brightness(0.9);}
-        }
-        section {
-          scroll-snap-align: start;
-          min-height: 100vh;
-          padding: 4rem 3rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-        @media (min-width: 768px) {
-          section {
-            padding: 4rem 6rem;
-          }
-        }
-        .heading-unmasking {
-          color: white;
-          font-weight: 900;
-          font-size: 4rem;
-          line-height: 1;
-          display: inline;
-          user-select: none;
-          margin-right: 5px;
-          user-select:none;
-        }
-        .heading-deepfakes {
-          color: #fc1b1b;
-          font-weight: 900;
-          font-size: 6rem;
-          line-height: 1;
-          display: inline-block;
-          margin-left: -8px;
-          user-select: none;
-          text-shadow: 0 0 12px #ff0000, 0 0 30px #cc0000, 0 0 110px #ff2020;
-          animation: emergencyTextLight 1.2s linear infinite;
-        }
-        @keyframes emergencyTextLight {
-          0%, 100% { opacity: 1; }
-          10%, 50%, 90% { opacity: 0.5; }
-          30%, 70% { opacity: 1; }
-        }
-        /* Cursor and typing styles */
-        .typewriter-text {
-          font-family: inherit;
-          font-size: 1rem;
-          color: #cbd5e1;
-        }
-        .cursor {
-          display: inline-block;
-          width: 1ch;
-          background-color: #fc6f6f;
-          animation: blink 1s steps(1) infinite;
-          margin-left: 2px;
-          height: 1em;
-          vertical-align: bottom;
-        }
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-      `}</style>
-
+      <FuturisticThemeWrapper>
+      
   {/* <Header setSection={scrollToSection} /> removed as per request */}
 
       {/* 1. Heading Section with custom heading and news box centered right */}
-      <section id="heading" className="flex flex-col md:flex-row items-center justify-between gap-6 relative">
+      <section id="heading" className="flex flex-col md:flex-row items-center justify-between gap-10 relative">
         {/* Left Part: Custom heading and button */}
         <div className="flex-1 max-w-xl flex flex-col items-start relative z-10">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
             <div aria-label="Unmasking Deepfakes" style={{ userSelect: "none", whiteSpace: "nowrap", position: "relative" }}>
-              <span className="heading-unmasking">Unmasking </span>
+              <span className="heading-unmasking">Unmasking</span>&nbsp;&nbsp;&nbsp;&nbsp;
               <span className="heading-deepfakes">Deepfakes</span>
             </div>
           </motion.div>
@@ -1102,7 +1002,7 @@ export default function Home() {
     </form>
   </div>
 </section>
-
+</FuturisticThemeWrapper>
     </>
   );
 }
