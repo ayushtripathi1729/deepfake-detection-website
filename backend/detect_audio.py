@@ -62,7 +62,7 @@ def generate_piechart(probs, categories, save_path):
     plt.savefig(save_path)
     plt.close()
 
-@detect_audio_bp.route('/detect/audio', methods=['POST'])
+@detect_audio_bp.route('/detect-audio', methods=['POST'])
 def detect_audio():
     upload_folder = "static/uploads"
     result_folder = "static/results"
