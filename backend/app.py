@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import os
 
 # Import your detection blueprints
@@ -8,6 +9,7 @@ from detect_audio import detect_audio_bp
 from detect_text import detect_text_bp
 
 app = Flask(__name__)
+CORS(app)  # Enables cross-origin requests for all routes
 
 # Register all detection blueprints
 app.register_blueprint(detect_image_bp)
