@@ -26,3 +26,20 @@ a {
   border-radius: 6px;
   border: 3px solid #f0f0f0;
 }
+
+/* === Animated scanning lines background for UploadImage.jsx === */
+.animated-scanning-line {
+  position: absolute;
+  left: -100%;
+  width: 200%;
+  height: 5px;
+  animation-name: move-scan-line;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  /* Optional: Add transition for color/opacity changes */
+}
+
+@keyframes move-scan-line {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
