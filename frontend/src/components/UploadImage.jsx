@@ -16,7 +16,6 @@ function UploadImage() {
     if (loading) {
       let percent = 0;
       progressRef.current = setInterval(() => {
-        // Simulate a smooth progress up to 96%, then wait for actual completion
         percent = Math.min(percent + Math.random() * 10, 96);
         setProgress(percent);
       }, 100);
@@ -137,46 +136,42 @@ function UploadImage() {
     }
   };
 
-  // Animated background scanning lines as a React element
-  const scanningBG = (
-    <svg
-      className="absolute top-0 left-0 w-full h-full z-0"
-      style={{ pointerEvents: "none" }}
-    >
-      {[...Array(20)].map((_, idx) => (
-        <rect
-          key={idx}
-          x="0"
-          y={idx * 40}
-          width="100%"
-          height="5"
-          fill={idx % 2 === 0 ? "#00ff00" : "#ff2222"}
-          opacity="0.08"
-        >
-          <animate
-            attributeName="opacity"
-            values="0.08;0.15;0.08"
-            dur="2s"
-            repeatCount="indefinite"
-            begin={`${idx * 0.15}s`}
-          />
-        </rect>
-      ))}
-    </svg>
-  );
+  // Animated scanning lines background using CSS animation
+  const scanningLines = Array.from({ length: 22 }, (_, idx) => ({
+    color: idx % 2 === 0 ? "#00ff00" : "#ff2222",
+    top: `${idx * 38}px`,
+    duration: idx % 2 === 0 ? 4.8 : 3.4,
+    delay: idx * 0.3,
+  }));
 
   return (
     <FuturisticThemeWrapper>
       <div className="relative flex justify-center items-center min-h-[70vh] p-4 overflow-hidden">
-        {scanningBG}
+        {/* Animated moving scanning lines */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div style={{ position: "absolute", width: "100%", height: "100%" }}>
+            {scanningLines.map((line, idx) => (
+              <div
+                key={idx}
+                className="animated-scanning-line"
+                style={{
+                  top: line.top,
+                  background: `linear-gradient(90deg, ${line.color} 40%, transparent 100%)`,
+                  opacity: 0.11,
+                  animationDuration: `${line.duration}s`,
+                  animationDelay: `${line.delay}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
         <div
-          className="w-full max-w-lg aboutus-section bg-[#0f172a] rounded-lg shadow-lg mx-auto p-8 relative"
+          className="w-full max-w-lg aboutus-section bg-[#0f172a] rounded-lg shadow-lg mx-auto p-8 relative z-10"
           style={{ border: "2px solid #5f3ebd" }}
         >
           <h2 className="text-2xl font-bold mb-8 text-center text-indigo-300">
             Upload Image for Analysis
           </h2>
-
           {/* Progress overlay */}
           {loading && (
             <div className="absolute inset-0 bg-[#0f172a] bg-opacity-80 flex items-center justify-center z-10 rounded-lg">
