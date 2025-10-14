@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import FuturisticThemeWrapper from "./FuturisticThemeWrapper";
 
 function UploadImage() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -123,15 +124,16 @@ function UploadImage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[70vh] bg-gray-100 p-4">
-      <div className="w-full max-w-lg bg-white rounded-lg shadow-lg mx-auto p-8">
-        <h2 className="text-2xl font-bold mb-8 text-center">
-          Upload Image for Analysis
-        </h2>
+    <FuturisticThemeWrapper>
+      <div className="flex justify-center items-center min-h-[70vh] p-4">
+        <div className="w-full max-w-lg aboutus-section bg-[#0f172a] rounded-lg shadow-lg mx-auto p-8" style={{ border: '2px solid #5f3ebd' }}>
+          <h2 className="text-2xl font-bold mb-8 text-center text-indigo-300">
+            Upload Image for Analysis
+          </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
           <div>
-            <label htmlFor="file-upload" className="font-semibold block mb-2">
+            <label htmlFor="file-upload" className="font-semibold block mb-2 text-indigo-200">
               Upload Image File
             </label>
             <input
@@ -139,7 +141,7 @@ function UploadImage() {
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="border px-3 py-2 rounded w-full"
+              className="input-field"
             />
           </div>
 
@@ -153,7 +155,7 @@ function UploadImage() {
               placeholder="https://example.com/image.jpg"
               value={imageURL}
               onChange={handleURLChange}
-              className="border px-3 py-2 rounded w-full"
+              className="input-field"
               aria-describedby="urlHelp"
             />
             <p id="urlHelp" className="text-xs text-gray-500 mt-1">
@@ -169,16 +171,14 @@ function UploadImage() {
             <button
               type="submit"
               disabled={loading || (!selectedFile && !imageURL.trim())}
-              className={`flex-grow bg-blue-600 text-white px-6 py-2 rounded font-semibold transition-opacity duration-200 ${
-                loading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
+              className={`flex-grow btn-primary ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
             >
               {loading ? "Analyzing..." : "Analyze Image"}
             </button>
             <button
               type="button"
               onClick={handleReset}
-              className="bg-gray-400 text-white px-6 py-2 rounded font-semibold transition-colors duration-200 hover:bg-gray-500"
+              className="btn-primary bg-indigo-600 hover:bg-indigo-700"
             >
               Reset
             </button>
@@ -246,8 +246,9 @@ function UploadImage() {
             )}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </FuturisticThemeWrapper>
   );
 }
 
