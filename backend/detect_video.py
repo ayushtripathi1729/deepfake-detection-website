@@ -55,7 +55,7 @@ def generate_piechart(probs, categories, save_path):
     plt.savefig(save_path)
     plt.close()
 
-@detect_video_bp.route('/detect/video', methods=['POST'])
+@detect_video_bp.route('/detect-video', methods=['POST'])
 def detect_video():
     upload_folder = "static/uploads"
     result_folder = "static/results"
