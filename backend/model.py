@@ -1,154 +1,104 @@
 import os
-import random
-import numpy as np
-from PIL import Image, ImageDraw
-from pathlib import Path
-from collections import Counter, OrderedDict
-
+import gdown
 import torch
-import torch.nn.functional as F
-from torchvision import transforms
-from pytorchcv.model_provider import get_model as ptcv_get_model
+from torchvision import models
+from PIL import Image
+import numpy as np
+import librosa
+import torchvision.transforms as transforms
+from PIL import Image
 
-from gradcam import GradCAM
+# Define categories
+CATEGORIES = ["deepfake", "manual_edit", "compression", "morphing", "original"]
 
-HEATMAPS_DIR = Path("uploads/heatmaps")
-HEATMAPS_DIR.mkdir(parents=True, exist_ok=True)
+# Google Drive Model IDs for downloading pretrained weights
+MODEL_IDS = {
+    "image_model_1": "FILE_ID_1",
+    "image_model_2": "FILE_ID_2",
+    "video_model_1": "FILE_ID_3",
+    "video_model_2": "FILE_ID_4",
+    "audio_model_1": "FILE_ID_5",
+    "audio_model_2": "FILE_ID_6",
+    "text_model_1": "FILE_ID_7",
+    "text_model_2": "FILE_ID_8"
+}
 
-DETECTION_LOG = []
-USER_FEEDBACK = []
+MODEL_PATHS = {
+    "image_model_1": "models/image_model_1.pth",
+    "image_model_2": "models/image_model_2.pth",
+    "video_model_1": "models/video_model_1.pth",
+    "video_model_2": "models/video_model_2.pth",
+    "audio_model_1": "models/audio_model_1.pth",
+    "audio_model_2": "models/audio_model_2.pth",
+    "text_model_1": "models/text_model_1",
+    "text_model_2": "models/text_model_2",
+}
 
-MODEL_PATH = "models/model_v3.pth"
+def download_model(name):
+    os.makedirs("models", exist_ok=True)
+    path = MODEL_PATHS[name]
+    if name.startswith("text_model"):
+        # Text models are directories (HF transformers), handle differently if needed
+        # Here, assumed downloaded/deployed differently
+        return
+    file_id = MODEL_IDS[name]
+    if not os.path.exists(path):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, path, quiet=False)
 
-model = ptcv_get_model("xception", pretrained=False, num_classes=2)
-state_dict = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
-new_state_dict = OrderedDict()
-for k, v in state_dict.items():
-    name = k[5:] if k.startswith("base.") else k
-    new_state_dict[name] = v
+# Image/Video/AUDIO model architecture loader helper (ResNet50 based)
+def build_resnet_model(num_classes=len(CATEGORIES)):
+    model = models.resnet50(pretrained=False)
+    model.fc = torch.nn.Linear(model.fc.in_features, num_classes)
+    return model
 
-model.load_state_dict(new_state_dict, strict=False)
-model.eval()
+def load_model(name):
+    download_model(name)
+    path = MODEL_PATHS[name]
+    if name.startswith("text_model"):
+        # Usually use HF transformers for text, import and load differently in text module
+        raise NotImplementedError("Text model loading handled separately")
+    model = build_resnet_model()
+    model.load_state_dict(torch.load(path, map_location="cpu"), strict=False)
+    model.eval()
+    return model
 
-transform = transforms.Compose([
-    transforms.Resize((299, 299)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
-])
-
-grad_cam = GradCAM(model, target_layer='features.stage4.unit1.body.block2')
-
-def preprocess_image(image_path_or_file):
-    img = Image.open(image_path_or_file).convert('RGB')
+# Image/audio/video preprocessing utils
+def preprocess_image(path):
+    img = Image.open(path).convert("RGB")
+    transform = transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])
+    ])
     return transform(img).unsqueeze(0)
 
-def save_heatmap_overlay(heatmap, orig_image_path):
-    orig_img = Image.open(orig_image_path).convert('RGBA')
-    heatmap_img = Image.fromarray(np.uint8(255 * heatmap)).resize(orig_img.size).convert('L')
-    red_img = Image.new('RGBA', orig_img.size, (255, 0, 0, 128))
-    heatmap_colored = Image.composite(red_img, Image.new('RGBA', orig_img.size), heatmap_img)
-    combined = Image.alpha_composite(orig_img, heatmap_colored)
-    filename = f"heatmap_{os.path.splitext(os.path.basename(orig_image_path))[0]}.png"
-    path = HEATMAPS_DIR / filename
-    combined.save(path)
-    return f"/uploads/heatmaps/{filename}"
+def preprocess_audio_spectrogram(path, sr=16000):
+    y, _ = librosa.load(path, sr=sr)
+    S = librosa.feature.melspectrogram(y, sr=sr, n_mels=128, fmax=8000)
+    S_dB = librosa.power_to_db(S, ref=np.max)
+    img = Image.fromarray(np.uint8(plt.cm.jet((S_dB - S_dB.min())/(S_dB.max()-S_dB.min()))*255)).convert("RGB")
+    transform = transforms.Compose([
+        transforms.Resize((224,224)),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])
+    ])
+    return transform(img).unsqueeze(0)
 
-def predict_label_and_score(output_tensor):
-    probs = F.softmax(output_tensor, dim=1)
-    score = probs[0, 1].item()
-    label = "deepfake" if score > 0.5 else "real"
-    return label, score
-
-def detect_image(image_path_or_file, media_id=None):
-    try:
-        input_tensor = preprocess_image(image_path_or_file)
+# Ensemble prediction utilities per modality
+def ensemble_predict_image(models, img_tensor):
+    probs_sum = None
+    for model in models:
         with torch.no_grad():
-            output = model(input_tensor)
-        label, score = predict_label_and_score(output)
+            p = torch.softmax(model(img_tensor), dim=1).cpu().numpy()
+        probs_sum = p if probs_sum is None else probs_sum + p
+    return (probs_sum / len(models))[0]
 
-        cam = grad_cam.generate(input_tensor)
-        heatmap_url = save_heatmap_overlay(cam, image_path_or_file)
+def ensemble_predict_audio(models, audio_tensor):
+    # Similar to image, assuming preprocessed
+    return ensemble_predict_image(models, audio_tensor)
 
-        if media_id:
-            log_detection("image", media_id, label, score)
-        return {"label": label, "score": round(score, 4), "heatmap": heatmap_url}
-    except Exception as e:
-        print(f"Detect image error: {e}")
-        label, score = random_label_score_image_only()
-        heatmap_url = save_dummy_heatmap()
-        if media_id:
-            log_detection("image", media_id, label, score)
-        return {"label": label, "score": score, "heatmap": heatmap_url}
+def ensemble_predict_video(models, video_tensor):
+    # Similar structure
+    return ensemble_predict_image(models, video_tensor)
 
-def detect_video(video_path_or_file, media_id=None):
-    label = random.choice(["real", "deepfake"])
-    score = random.uniform(0.6, 0.99)
-    heatmap_url = save_dummy_heatmap()
-    if media_id:
-        log_detection("video", media_id, label, score)
-    return {"label": label, "score": score, "heatmap": heatmap_url}
-
-def detect_audio(audio_path_or_file, media_id=None):
-    label = random.choice(["real", "deepfake"])
-    score = random.uniform(0.6, 0.99)
-    heatmap_url = save_dummy_heatmap()
-    if media_id:
-        log_detection("audio", media_id, label, score)
-    return {"label": label, "score": score, "heatmap": heatmap_url}
-
-def detect_text(text, media_id=None):
-    label = random.choice(["real", "deepfake"])
-    score = random.uniform(0.6, 0.99)
-    if media_id:
-        log_detection("text", media_id, label, score)
-    return {"label": label, "score": score, "heatmap": None}
-
-def detect_file(file_path_or_file, media_id=None):
-    label = random.choice(["real", "deepfake"])
-    score = random.uniform(0.6, 0.99)
-    heatmap_url = save_dummy_heatmap()
-    if media_id:
-        log_detection("file", media_id, label, score)
-    return {"label": label, "score": score, "heatmap": heatmap_url}
-
-def random_label_score_image_only():
-    labels = ["real", "deepfake"]
-    label = random.choice(labels)
-    score = random.uniform(0.6, 0.99)
-    return label, round(score, 4)
-
-def create_dummy_heatmap(size=(224, 224)):
-    heatmap = Image.new("RGBA", size, (255, 0, 0, 0))
-    draw = ImageDraw.Draw(heatmap)
-    for _ in range(10):
-        x = random.randint(0, size[0] - 50)
-        y = random.randint(0, size[1] - 50)
-        radius = random.randint(20, 50)
-        alpha = random.randint(80, 160)
-        draw.ellipse((x, y, x + radius, y + radius), fill=(255, 0, 0, alpha))
-    return heatmap
-
-def save_dummy_heatmap():
-    heatmap_img = create_dummy_heatmap()
-    filename = f"heatmap_{random.randint(1000, 9999)}.png"
-    path = HEATMAPS_DIR / filename
-    heatmap_img.save(path)
-    return f"/uploads/heatmaps/{filename}"
-
-def log_detection(media_type, media_id, label, score):
-    DETECTION_LOG.append({"media_type": media_type, "media_id": media_id, "label": label, "score": score})
-
-def log_user_feedback(media_type, media_id, feedback):
-    USER_FEEDBACK.append({"media_type": media_type, "media_id": media_id, "feedback": feedback})
-
-def get_detection_summary():
-    labels = [entry["label"] for entry in DETECTION_LOG]
-    return dict(Counter(labels))
-
-def get_feedback_summary():
-    feedbacks = [entry["feedback"] for entry in USER_FEEDBACK]
-    return dict(Counter(feedbacks))
-
-def add_user_feedback(media_type, media_id, feedback):
-    log_user_feedback(media_type, media_id, feedback)
-    return True
