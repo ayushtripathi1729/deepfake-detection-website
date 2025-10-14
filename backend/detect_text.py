@@ -44,7 +44,7 @@ def get_sentences(text):
     # Use period/newline as splitter
     return [s.strip() for s in re.split(r'[.!?\n]+', text) if s.strip()]
 
-@detect_text_bp.route('/detect/text', methods=['POST'])
+@detect_text_bp.route('/detect-text', methods=['POST'])
 def detect_text():
     upload_folder = "static/uploads"
     result_folder = "static/results"
