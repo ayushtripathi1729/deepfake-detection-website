@@ -89,7 +89,7 @@ def generate_piechart(probs, categories, save_folder):
     plt.savefig(out_path); plt.close()
     return out_path.replace("static/", "/static/")
 
-@detect_image_bp.route('/detect/image', methods=['POST'])
+@detect_image_bp.route('/detect-image', methods=['POST'])
 def detect_image():
     upload_folder, heatmap_folder, result_folder = \
         "static/uploads", "static/heatmaps", "static/results"
