@@ -1,47 +1,41 @@
 import torch
 import numpy as np
 import cv2
+import os
+import uuid
+from torchvision import models
+from PIL import Image
 
 class GradCAM:
-    def __init__(self, model: torch.nn.Module, target_layer: str):
+    def __init__(self, model, target_layer):
         self.model = model
         self.target_layer = target_layer
         self.gradients = None
         self.activations = None
-        self._register_hooks()
+        self.hook_layers()
 
-    def _register_hooks(self):
-        found = False
-        for name, module in self.model.named_modules():
-            if name == self.target_layer:
-                module.register_forward_hook(self._forward_hook)
-                module.register_full_backward_hook(self._backward_hook)
-                found = True
-                break
-        if not found:
-            raise ValueError(f"Layer '{self.target_layer}' not found in model.")
+    def hook_layers(self):
+        def backward_hook(module, grad_in, grad_out):
+            self.gradients = grad_out[0].detach()
 
-    def _forward_hook(self, module, input, output):
-        self.activations = output.detach()
+        def forward_hook(module, inp, out):
+            self.activations = out.detach()
 
-    def _backward_hook(self, module, grad_input, grad_output):
-        self.gradients = grad_output[0].detach()
+        self.target_layer.register_forward_hook(forward_hook)
+        self.target_layer.register_backward_hook(backward_hook)
 
-    def generate(self, input_tensor: torch.Tensor, class_idx: int = None) -> np.ndarray:
-        self.model.zero_grad()
+    def generate_heatmap(self, input_tensor, target_class=None):
+        self.model.eval()
         output = self.model(input_tensor)
+        if target_class is None:
+            target_class = output.argmax(dim=1).item()
 
-        if class_idx is None:
-            class_idx = output.argmax(dim=1).item()
-
-        one_hot = torch.zeros_like(output)
-        one_hot[0, class_idx] = 1
-
-        output.backward(gradient=one_hot, retain_graph=True)
+        self.model.zero_grad()
+        loss = output[0][target_class]
+        loss.backward()
 
         gradients = self.gradients[0].cpu().numpy()
         activations = self.activations[0].cpu().numpy()
-
         weights = np.mean(gradients, axis=(1, 2))
         cam = np.zeros(activations.shape[1:], dtype=np.float32)
 
@@ -49,9 +43,28 @@ class GradCAM:
             cam += w * activations[i]
 
         cam = np.maximum(cam, 0)
-        cam = cv2.resize(cam, (input_tensor.size(3), input_tensor.size(2)))
-
-        cam -= np.min(cam)
-        if np.max(cam) != 0:
-            cam /= np.max(cam)
+        cam = cv2.resize(cam, (input_tensor.shape[2], input_tensor.shape[3]))
+        cam = cam - np.min(cam)
+        cam = cam / (np.max(cam) + 1e-8)
         return cam
+
+def save_heatmap_on_image(img_path, heatmap, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+    img = cv2.imread(img_path)
+    img = cv2.resize(img, (heatmap.shape[1], heatmap.shape[0]))
+    heatmap_img = cv2.applyColorMap(np.uint8(255 * heatmap), cv2.COLORMAP_JET)
+    overlayed_img = heatmap_img * 0.4 + img * 0.6
+    filename = f"gradcam_{uuid.uuid4()}.jpg"
+    out_path = os.path.join(output_folder, filename)
+    cv2.imwrite(out_path, overlayed_img)
+    return out_path.replace("static/", "/static/")
+
+def create_heatmap(model, input_tensor, img_path, output_folder, target_layer=None):
+    if target_layer is None:
+        # Default to last conv layer of ResNet
+        target_layer = model.layer4
+
+    gradcam = GradCAM(model, target_layer)
+    heatmap = gradcam.generate_heatmap(input_tensor)
+    heatmap_path = save_heatmap_on_image(img_path, heatmap, output_folder)
+    return heatmap_path
