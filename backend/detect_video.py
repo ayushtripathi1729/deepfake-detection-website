@@ -72,7 +72,7 @@ def detect_video():
     elif url:
         video_path = download_video_from_url(url, upload_folder)
         if not video_path:
-            return jsonify({"error": "Failed to download video."}), 400Continuing the code for `detect_video.py`:
+            return jsonify({"error": "Failed to download video."}), 400
 
 else:
     return jsonify({"error": "No video file or URL provided."}), 400
