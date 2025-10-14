@@ -12,10 +12,11 @@ app = Flask(__name__)
 CORS(app)  # Enables cross-origin requests for all routes
 
 # Register all detection blueprints
-app.register_blueprint(detect_image_bp)
-app.register_blueprint(detect_video_bp)
-app.register_blueprint(detect_audio_bp)
-app.register_blueprint(detect_text_bp)
+app.register_blueprint(detect_image_bp, url_prefix='/api')
+app.register_blueprint(detect_video_bp, url_prefix='/api')
+app.register_blueprint(detect_audio_bp, url_prefix='/api')
+app.register_blueprint(detect_text_bp, url_prefix='/api')
+
 
 # Ensure essential static folders exist
 for folder in ["static/uploads", "static/heatmaps", "static/results", "models"]:
