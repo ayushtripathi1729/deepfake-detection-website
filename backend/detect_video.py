@@ -74,8 +74,8 @@ def detect_video():
         if not video_path:
             return jsonify({"error": "Failed to download video."}), 400
 
-else:
-    return jsonify({"error": "No video file or URL provided."}), 400
+    else:
+        return jsonify({"error": "No video file or URL provided."}), 400
 
 try:
     # Load models (multi-model ensemble)
