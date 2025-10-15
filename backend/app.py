@@ -11,12 +11,11 @@ from detect_text import detect_text_bp
 app = Flask(__name__)
 CORS(app)  # Enables cross-origin requests for all routes
 
-# Register all detection blueprints
+# Register all detection blueprints with consistent /api prefix
 app.register_blueprint(detect_image_bp, url_prefix='/api')
 app.register_blueprint(detect_video_bp, url_prefix='/api')
 app.register_blueprint(detect_audio_bp, url_prefix='/api')
 app.register_blueprint(detect_text_bp, url_prefix='/api')
-
 
 # Ensure essential static folders exist
 for folder in ["static/uploads", "static/heatmaps", "static/results", "models"]:
@@ -27,10 +26,11 @@ def index():
     return jsonify({
         "message": "Deepfake Detection API running",
         "endpoints": {
-            "image_detection": "/detect/image [POST with file or url]",
-            "video_detection": "/detect/video [POST with file or url]",
-            "audio_detection": "/detect/audio [POST with file or url]",
-            "text_detection": "/detect/text [POST with file or url or raw text]"
+            # Updated endpoints to include /api prefix and consistent naming with blueprints
+            "image_detection": "/api/detect-image [POST with file or url]",
+            "video_detection": "/api/detect-video [POST with file or url]",
+            "audio_detection": "/api/detect-audio [POST with file or url]",
+            "text_detection": "/api/detect-text [POST with file or url or raw text]"
         }
     })
 
