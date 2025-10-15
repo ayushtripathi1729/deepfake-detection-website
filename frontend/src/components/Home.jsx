@@ -5,6 +5,8 @@ import FuturisticThemeWrapper from './FuturisticThemeWrapper';
 import parta from "../assets/logos/parta1.jpg";
 import partb from "../assets/logos/partb.jpg";
 import partc from "../assets/logos/partc1.jpg";
+import emailjs from "@emailjs/browser";
+
 
 // DATA ARRAYS
 const NEWS = [
@@ -797,16 +799,30 @@ export default function Home() {
     setForm((s) => ({ ...s, [name]: value }));
   };
   const onSubmit = (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setSubmitting(true);
-    setTimeout(() => {
-      alert("Thank you for your message!");
-      setForm({ name: "", email: "", phone: "", queryType: "", message: "" });
-      setErrors({});
-      setSubmitting(false);
-    }, 1400);
-  };
+  e.preventDefault();
+  if (!validate()) return;
+  setSubmitting(true);
+  emailjs
+    .sendForm(
+      import.meta.env.VITE_SERVICE_ID,   // Your EmailJS Service ID (from Vercel env)
+      import.meta.env.VITE_TEMPLATE_ID,  // Your EmailJS Template ID (from Vercel env)
+      formRef.current,                   // The form reference
+      import.meta.env.VITE_PUBLIC_KEY    // Your EmailJS Public Key (from Vercel env)
+    )
+    .then(
+      () => {
+        alert("Thank you for your message!");
+        setForm({ name: "", email: "", phone: "", queryType: "", message: "" });
+        setErrors({});
+        setSubmitting(false);
+      },
+      (error) => {
+        alert("Failed to send message. Try again later.");
+        setSubmitting(false);
+      }
+    );
+};
+
   const onReset = (e) => {
     e.preventDefault();
     setForm({ name: "", email: "", phone: "", queryType: "", message: "" });
