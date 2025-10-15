@@ -779,28 +779,66 @@ export default function Home() {
     }
   };
 
-  // Form validation & handlers - same as before
-  const validate = () => {
-    let errs = {};
-    if (!form.email.trim() && !form.phone.trim()) {
-      errs.email = "Email or phone is required";
-      errs.phone = "Email or phone is required";
+async function validateEmailExists(email) {
+  const apiKey = process.env.REACT_APP_EMAIL_VERIFICATION_API_KEY;
+  const url = `https://emailvalidation.abstractapi.com/v1/?api_key=${apiKey}&email=${encodeURIComponent(email)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error("Email verification API error: ", response.statusText);
+      return false; // API error treated as invalid to be safe
     }
-    if (!form.name.trim()) errs.name = "Name is required";
-    else if (form.name.length > 40) errs.name = "Name must be under 40 characters";
-    if (!form.queryType) errs.queryType = "Please select a query type";
-    if (!form.message.trim()) errs.message = "Message is required";
-    if (form.message.length > 500) errs.message = "Message must be under 500 characters";
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((s) => ({ ...s, [name]: value }));
-  };
-  const onSubmit = (e) => {
+
+    const data = await response.json();
+    // AbstractAPI returns deliverability: DELIVERABLE | UNDELIVERABLE | UNKNOWN
+    return data.deliverability === "DELIVERABLE";
+  } catch (error) {
+    console.error("Error validating email existence:", error);
+    return false;
+  }
+}
+
+const validate = async () => {
+  let errs = {};
+
+  if (!form.email.trim() && !form.phone.trim()) {
+    errs.email = "Email or phone is required";
+    errs.phone = "Email or phone is required";
+  }
+
+  if (form.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email.trim())) {
+      errs.email = "Please enter a valid email address";
+    } else {
+      const exists = await validateEmailExists(form.email.trim());
+      if (!exists) {
+        errs.email = "Email address does not exist or is undeliverable";
+      }
+    }
+  }
+
+  if (!form.name.trim()) errs.name = "Name is required";
+  else if (form.name.length > 40) errs.name = "Name must be under 40 characters";
+
+  if (!form.queryType) errs.queryType = "Please select a query type";
+
+  if (!form.message.trim()) errs.message = "Message is required";
+  if (form.message.length > 500) errs.message = "Message must be under 500 characters";
+
+  setErrors(errs);
+  return Object.keys(errs).length === 0;
+};
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setForm((s) => ({ ...s, [name]: value }));
+};
+
+const onSubmit = async (e) => {
   e.preventDefault();
-  if (!validate()) return;
+  if (!(await validate())) return;
   setSubmitting(true);
 
   const serviceID = process.env.REACT_APP_SERVICE_ID;
@@ -840,6 +878,7 @@ export default function Home() {
       setSubmitting(false);
     });
 };
+
 
 
   const onReset = (e) => {
