@@ -802,26 +802,28 @@ export default function Home() {
   e.preventDefault();
   if (!validate()) return;
   setSubmitting(true);
-  emailjs.sendForm(
-  process.env.REACT_APP_SERVICE_ID,
-  process.env.REACT_APP_TEMPLATE_ID,
-  formRef.current,
-  process.env.REACT_APP_PUBLIC_KEY
-  )
+  console.log("Starting emailjs.sendForm");
 
-    .then(
-      () => {
-        alert("Thank you for your message!");
-        setForm({ name: "", email: "", phone: "", queryType: "", message: "" });
-        setErrors({});
-        setSubmitting(false);
-      },
-      (error) => {
-        alert("Failed to send message. Try again later.");
-        setSubmitting(false);
-      }
-    );
+  emailjs.sendForm(
+    process.env.REACT_APP_SERVICE_ID,
+    process.env.REACT_APP_TEMPLATE_ID,
+    formRef.current,
+    process.env.REACT_APP_PUBLIC_KEY
+  )
+  .then(() => {
+    console.log("Email sent successfully");
+    alert("Thank you for your message!");
+    setForm({ name: "", email: "", phone: "", queryType: "", message: "" });
+    setErrors({});
+    setSubmitting(false);
+  })
+  .catch((error) => {
+    console.error("Email sending failed:", error);
+    alert("Failed to send message. Try again later.");
+    setSubmitting(false);
+  });
 };
+
 
   const onReset = (e) => {
     e.preventDefault();
