@@ -960,7 +960,7 @@ export default function Home() {
           value={form.email}
           onChange={handleChange}
           type="email"
-          placeholder="Required if no phone"
+          placeholder="Required"
           error={errors.email}
           className="flex-1"
         />
