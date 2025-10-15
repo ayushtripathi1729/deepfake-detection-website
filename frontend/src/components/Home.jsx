@@ -802,13 +802,13 @@ export default function Home() {
   e.preventDefault();
   if (!validate()) return;
   setSubmitting(true);
-  emailjs
-    .sendForm(
-      import.meta.env.VITE_SERVICE_ID,   // Your EmailJS Service ID (from Vercel env)
-      import.meta.env.VITE_TEMPLATE_ID,  // Your EmailJS Template ID (from Vercel env)
-      formRef.current,                   // The form reference
-      import.meta.env.VITE_PUBLIC_KEY    // Your EmailJS Public Key (from Vercel env)
-    )
+  emailjs.sendForm(
+  process.env.REACT_APP_SERVICE_ID,
+  process.env.REACT_APP_TEMPLATE_ID,
+  formRef.current,
+  process.env.REACT_APP_PUBLIC_KEY
+  )
+
     .then(
       () => {
         alert("Thank you for your message!");
