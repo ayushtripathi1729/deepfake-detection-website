@@ -805,28 +805,36 @@ export default function Home() {
 
   const serviceID = process.env.REACT_APP_SERVICE_ID;
   const templateID = process.env.REACT_APP_TEMPLATE_ID;
-  const replyTemplateID = process.env.REACT_APP_REPLY_TEMPLATE_ID; // add this to env variables
+  const replyTemplateID = process.env.REACT_APP_REPLY_TEMPLATE_ID; // Add this to your Vercel env vars
   const publicKey = process.env.REACT_APP_PUBLIC_KEY;
 
+  // First, send the main notification email to your team/inbox
   emailjs.sendForm(serviceID, templateID, formRef.current, publicKey)
     .then(() => {
-      // Now send auto-reply email (you can send using form data or a separate params object)
-      emailjs.send(serviceID, replyTemplateID, {
-        name: form.name,
-        email: form.email,
-        message: form.message,
-      }, publicKey)
+      // On success, send the auto-reply to the user
+      emailjs.send(
+        serviceID,
+        replyTemplateID,
+        {
+          name: form.name,
+          email: form.email,
+          message: form.message,
+        },
+        publicKey
+      )
       .then(() => {
         alert("Thank you for your message! A confirmation email has been sent.");
         setForm({ name: "", email: "", phone: "", queryType: "", message: "" });
         setErrors({});
         setSubmitting(false);
-      }, (error) => {
+      })
+      .catch((error) => {
         console.error("Auto-reply email failed:", error);
         alert("Message sent but failed to send confirmation email.");
         setSubmitting(false);
       });
-    }, (error) => {
+    })
+    .catch((error) => {
       console.error("Message sending failed:", error);
       alert("Failed to send message. Try again later.");
       setSubmitting(false);
