@@ -54,7 +54,7 @@ function UploadImage() {
 
       if (selectedFile) {
         const formData = new FormData();
-        formData.append("image", selectedFile);
+        formData.append("file", selectedFile);
         response = await fetch("/api/detect-image", {
           method: "POST",
           body: formData,
